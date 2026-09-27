@@ -18,6 +18,8 @@ class Monster {
         void begin();
         void update();
 
+        void setPosition(int8_t x, int8_t y);
+
     private:
         Position position { 0,0 };
 

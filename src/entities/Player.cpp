@@ -7,7 +7,32 @@
 extern Arduboy2 arduboy;
 
 void Player::begin() {
-    position = { 2, 2};
+    position = { 2, 2 };
+    direction = Direction::DOWN;
+
+    maxHp = 5;
+    hp = maxHp;
+}
+
+uint8_t Player::getHp() const {
+    return hp;
+}
+
+uint8_t Player::getMaxHp() const {
+    return maxHp;
+}
+
+bool Player::isAlive() const {
+    return hp > 0;
+}
+
+void Player::takeDamage(uint8_t damage) {
+    if (damage >= hp) {
+        hp = 0;
+        return;
+    }
+
+    hp -= damage;
 }
 
 void Player::update(
@@ -98,5 +123,20 @@ void Player::attack(Monster* monsters, uint8_t monsterCount) {
         case Direction::RIGHT:
             ++targetX;
             break;
+    }
+
+    for (uint8_t i = 0; i < monsterCount; ++i) {
+        if (!monsters[i].isAlive()) {
+            continue;
+        }
+
+        const Position monsterPos = monsters[i].getPosition();
+
+        if (monsterPos.x == targetX &&
+            monsterPos.y == targetY) {
+
+            monsters[i].takeDamage(1);
+            return;
+        }
     }
 }

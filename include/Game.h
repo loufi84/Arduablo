@@ -1,8 +1,10 @@
+#include "Config.h"
+
 #include "entities/Player.h"
 #include "entities/Monster.h"
 #include "world/Dungeon.h"
-#include "Config.h"
 #include "rendering/Renderer.h"
+#include "rendering/Hud.h"
 
 enum class GameState : uint8_t {
     TITLE,
@@ -26,4 +28,5 @@ class Game {
         Monster monsters[MAX_MONSTERS];
 
         Renderer renderer;
+        Hud hud;
 };

@@ -39,3 +39,7 @@ void Monster::takeDamage(uint8_t damage) {
 
     hp -= damage;
 }
+
+void Monster::setPosition(int8_t x, int8_t y) {
+    position = { x,y };
+}
