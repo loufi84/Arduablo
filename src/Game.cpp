@@ -1,41 +1,51 @@
-#include <stdint.h>
-
+#include <Arduboy2.h>
 #include "Game.h"
 
-void Game::begin() {
-    dungeon.begin();
-    player.begin();
+extern Arduboy2 arduboy;
 
-    for (uint8_t i = 0; i < MAX_MONSTERS; i++) {
-        monsters[i].begin();
-    }
+void Game::begin() {
+    state = GameState::TITLE;
 }
 
 void Game::update() {
-    switch(state) {
+    switch (state) {
         case GameState::TITLE:
-            break;
-
-        case GameState::PLAYING:
-            dungeon.update();
-            player.update();
-
-            for (uint8_t i = 0; i < MAX_MONSTERS; i++) {
-                monsters[i].update();
+            if (arduboy.justPressed(A_BUTTON)) {
+                dungeon.begin();
+                player.begin();
+                monsters[0].spawn(8, 3, 3);
+                state = GameState::PLAYING;
             }
             break;
 
-        case GameState::INVENTORY:
-            break;
-        
-        case GameState::TOWN:
+        case GameState::PLAYING:
+            player.update(dungeon, monsters, MAX_MONSTERS);
             break;
 
-        case GameState::GAME_OVER:
+        default:
             break;
     }
 }
 
 void Game::render() {
+    arduboy.clear();
 
+    switch (state) {
+        case GameState::TITLE:
+            arduboy.setCursor(38, 22);
+            arduboy.print(F("ARDUABLO"));
+
+            arduboy.setCursor(32, 40);
+            arduboy.print(F("[A] START"));
+            break;
+
+        case GameState::PLAYING:
+            renderer.drawDungeon(dungeon);
+            renderer.drawPlayer(player);
+            renderer.drawMonsters(monsters, MAX_MONSTERS);
+            break;
+
+        default:
+            break;
+    }
 }

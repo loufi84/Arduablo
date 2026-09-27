@@ -1,5 +1,8 @@
 #include "entities/Player.h"
 #include "entities/Monster.h"
+#include "world/Dungeon.h"
+#include "Config.h"
+#include "rendering/Renderer.h"
 
 enum class GameState : uint8_t {
     TITLE,
@@ -21,4 +24,6 @@ class Game {
         Dungeon dungeon;
         Player player;
         Monster monsters[MAX_MONSTERS];
+
+        Renderer renderer;
 };
