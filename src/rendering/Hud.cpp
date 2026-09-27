@@ -12,4 +12,11 @@ void Hud::draw(const Player& player) {
     arduboy.print(player.getHp());
     arduboy.print("/");
     arduboy.print(player.getMaxHp());
+
+    arduboy.setCursor(55, 56);
+
+    arduboy.print(F("DMG "));
+    arduboy.print(
+        player.getAttackDamage()
+    );
 }

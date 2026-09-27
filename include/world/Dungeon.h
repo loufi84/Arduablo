@@ -1,19 +1,33 @@
 #pragma once
 
 #include <stdint.h>
+
+#include "Config.h"
+#include "Types.h"
 #include "world/Tile.h"
 
 class Dungeon {
-    public:
-        static constexpr uint8_t MAP_WIDTH = 16;
-        static constexpr uint8_t MAP_HEIGHT = 7;
+public:
+    static constexpr uint8_t MAP_WIDTH = ::MAP_WIDTH;
+    static constexpr uint8_t MAP_HEIGHT = ::MAP_HEIGHT;
 
-        void begin();
-        void update();
+    void begin();
+    void update();
 
-        Tile getTile(uint8_t x, uint8_t y) const;
-        bool isWalkable(uint8_t x, uint8_t y) const;
+    Tile getTile(uint8_t x, uint8_t y) const;
+    void setTile(uint8_t x, uint8_t y, Tile tile);
 
-    private:
-        Tile tiles[MAP_WIDTH * MAP_HEIGHT];
+    bool isWalkable(uint8_t x, uint8_t y) const;
+
+    Position getStartPosition() const;
+    Position getExitPosition() const;
+
+    void setStartPosition(Position position);
+    void setExitPosition(Position position);
+
+private:
+    uint8_t tiles[(MAP_WIDTH * MAP_HEIGHT + 1) / 2];
+
+    Position startPosition { 1,1 };
+    Position exitPosition { 1,1 };
 };

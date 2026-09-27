@@ -45,7 +45,24 @@ void AI::updateZombie(
         (dx == 0 && dy == 1) ||
         (dx == 0 && dy == -1)
     ) {
+        Direction attackDirection;
+
+        if (dx > 0) {
+            attackDirection = Direction::RIGHT;
+        }
+        else if (dx < 0) {
+            attackDirection = Direction::LEFT;
+        }
+        else if (dy > 0) {
+            attackDirection = Direction::DOWN;
+        }
+        else {
+            attackDirection = Direction::UP;
+        }
+
+        monster.startAttack(attackDirection);
         player.takeDamage(1);
+
         return;
     }
 

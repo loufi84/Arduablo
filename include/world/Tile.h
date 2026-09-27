@@ -4,5 +4,6 @@
 
 enum class Tile : uint8_t {
     FLOOR = 0,
-    WALL
+    WALL,
+    STAIRS_DOWN
 };

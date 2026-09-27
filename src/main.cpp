@@ -6,6 +6,7 @@ Game game;
 
 void setup() {
     arduboy.begin();
+    arduboy.initRandomSeed();
     arduboy.setFrameRate(30);
 
     game.begin();
