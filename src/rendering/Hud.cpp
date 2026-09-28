@@ -21,18 +21,76 @@ void Hud::draw(const Player& player) {
     );
 }
 
-void Hud::drawItemName(ItemType type) {
-    switch (type) {
+void Hud::drawItemName(const Item& item) {
+
+    // Préfixe
+    switch (item.prefix) {
+
+        case ItemPrefix::SHARP:
+            arduboy.print(F("Sharp "));
+            break;
+
+        case ItemPrefix::BRUTAL:
+            arduboy.print(F("Brutal "));
+            break;
+
+        case ItemPrefix::SAVAGE:
+            arduboy.print(F("Savage "));
+            break;
+
+        default:
+            break;
+    }
+
+
+    // Base
+    switch (item.type) {
+
         case ItemType::SWORD:
             arduboy.print(F("Sword"));
             break;
-            
+
         case ItemType::AXE:
             arduboy.print(F("Axe"));
             break;
 
         default:
             arduboy.print(F("???"));
+            break;
+    }
+
+
+    // Suffixe
+    switch (item.suffix) {
+
+        case ItemSuffix::OF_MIGHT:
+            arduboy.print(F(" of Might"));
+            break;
+
+        case ItemSuffix::OF_POWER:
+            arduboy.print(F(" of Power"));
+            break;
+
+        case ItemSuffix::OF_DOOM:
+            arduboy.print(F(" of Doom"));
+            break;
+
+        default:
+            break;
+    }
+
+    switch (item.rarity) {
+
+        case ItemRarity::COMMON:
+            arduboy.print(' ');
+            break;
+
+        case ItemRarity::MAGIC:
+            arduboy.print('*');
+            break;
+
+        case ItemRarity::RARE:
+            arduboy.print('!');
             break;
     }
 }
@@ -93,7 +151,7 @@ void Hud::drawInventory(
             arduboy.print(' ');
         }
 
-        drawItemName(item.type);
+        drawItemName(item);
 
         arduboy.print(F(" +"));
         arduboy.print(item.damage);
@@ -107,7 +165,7 @@ void Hud::drawInventory(
         player.getEquipment().getWeapon();
 
     if (equipped.isValid()) {
-        drawItemName(equipped.type);
+        drawItemName(equipped);
 
         arduboy.print(F(" +"));
         arduboy.print(equipped.damage);

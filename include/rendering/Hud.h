@@ -13,5 +13,5 @@ class Hud {
         void drawInventory(const Player& player, uint8_t selectedIndex);
 
     private:
-        void drawItemName(ItemType type);
+        void drawItemName(const Item& item);
 };
