@@ -28,6 +28,8 @@ class Game {
         void generateLevel();
         void tryDropLoot(Position position);
         void tryPickupItem();
+        uint8_t inventorySelection = 0;
+        void updateInventory();
 
         uint8_t depth = 1;
 

@@ -58,6 +58,20 @@ void Game::update() {
                 break;
             }
 
+            // Gestion de l'inventaire
+            if (arduboy.justPressed(B_BUTTON)) {
+                const uint8_t before = player.getInventoryCount();
+                tryPickupItem();
+                const uint8_t after = player.getInventoryCount();
+
+                // Si pas d'objet on ouvre le sac
+                if (before == after) {
+                    inventorySelection = 0;
+                    state = GameState::INVENTORY;
+                    break;
+                }
+            }
+
 
             // Animations des monstres
             for (
@@ -96,6 +110,11 @@ void Game::update() {
                 state = GameState::GAME_OVER;
             }
 
+            break;
+        }
+
+        case GameState::INVENTORY: {
+            updateInventory();
             break;
         }
 
@@ -172,6 +191,11 @@ void Game::render() {
 
             hud.draw(player);
 
+            break;
+        }
+
+        case GameState::INVENTORY: {
+            hud.drawInventory(player, inventorySelection);
             break;
         }
 
@@ -357,12 +381,57 @@ void Game::tryPickupItem() {
             continue;
         }
 
-        player.equip(
-            groundItems[i].item
-        );
+        if (player.addItem(groundItems[i].item)) {
+            groundItems[i].active = false;
+        }
 
         groundItems[i].active = false;
 
         return;
+    }
+}
+
+void Game::updateInventory() {
+    const uint8_t count = player.getInventoryCount();
+
+    if (arduboy.justPressed(B_BUTTON)) {
+        state = GameState::PLAYING;
+        return;
+    }
+
+    if (count == 0) {
+        inventorySelection = 0;
+        return;
+    }
+
+    if (arduboy.justPressed(UP_BUTTON)) {
+        if (inventorySelection == 0) {
+            inventorySelection = count - 1;
+        }
+        else {
+            --inventorySelection;
+        }
+    }
+
+    if (arduboy.justPressed(DOWN_BUTTON)) {
+        ++inventorySelection;
+
+        if (inventorySelection >= count) {
+            inventorySelection = 0;
+        }
+    }
+
+    if (arduboy.justPressed(A_BUTTON)) {
+        player.equipInventoryItem(inventorySelection);
+
+        // Le premier équipement réduit le nombre d'objets du sac
+        const uint8_t newCount = player.getInventoryCount();
+
+        if (newCount == 0) {
+            inventorySelection = 0;
+        }
+        else if (inventorySelection >= newCount) {
+            inventorySelection = newCount - 1;
+        }
     }
 }

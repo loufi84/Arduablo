@@ -10,7 +10,6 @@ extern Arduboy2 arduboy;
 
 void Player::begin() {
     position = { 2, 2 };
-
     direction = Direction::DOWN;
 
     maxHp = 5;
@@ -18,6 +17,7 @@ void Player::begin() {
 
     attackTimer = 0;
 
+    inventory.clear();
     equipment.clear();
 }
 
@@ -334,4 +334,76 @@ void Player::equip(const Item& item) {
 
 const Equipment& Player::getEquipment() const {
     return equipment;
+}
+
+bool Player::addItem(const Item& item) {
+    return inventory.add(item);
+}
+
+
+uint8_t Player::getInventoryCount() const {
+    return inventory.getCount();
+}
+
+
+const Item& Player::getInventoryItem(
+    uint8_t index
+) const {
+    return inventory.get(index);
+}
+
+
+bool Player::equipInventoryItem(
+    uint8_t index
+) {
+    if (index >= inventory.getCount()) {
+        return false;
+    }
+
+
+    const Item& selected =
+        inventory.get(index);
+
+    // Pour l'instant seules les armes
+    // sont équipables.
+    if (
+        selected.type != ItemType::SWORD &&
+        selected.type != ItemType::AXE
+    ) {
+        return false;
+    }
+
+
+    // getWeapon() renvoie une référence vers l'arme
+    // contenue dans Equipment, et celle-ci va changer
+    // quelques lignes plus bas.
+    const Item oldWeapon =
+        equipment.getWeapon();
+
+
+    Item newWeapon;
+
+    if (!inventory.remove(
+        index,
+        newWeapon
+    )) {
+        return false;
+    }
+
+
+    equipment.equipWeapon(
+        newWeapon
+    );
+
+
+    // S'il y avait déjà une arme,
+    // elle retourne dans le sac.
+    // Comme on vient de retirer newWeapon,
+    // une place est forcément disponible.
+    if (oldWeapon.isValid()) {
+        inventory.add(oldWeapon);
+    }
+
+
+    return true;
 }

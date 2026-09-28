@@ -4,6 +4,7 @@
 
 #include "Types.h"
 #include "items/Equipment.h"
+#include "items/Inventory.h"
 
 class Dungeon;
 class Monster;
@@ -47,6 +48,12 @@ public:
     void equip(const Item& item);
     const Equipment& getEquipment() const;
 
+    // Inventaire
+    bool addItem(const Item& item);
+    uint8_t getInventoryCount() const;
+    const Item& getInventoryItem(uint8_t index) const;
+    bool equipInventoryItem(uint8_t index);
+
 private:
     Position position { 2, 2 };
 
@@ -57,6 +64,7 @@ private:
 
     uint8_t attackTimer = 0;
 
+    Inventory inventory;
     Equipment equipment;
 
     void tryMove(
