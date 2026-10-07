@@ -1,22 +1,40 @@
 #include <Arduboy2.h>
 
 #include "Config.h"
+
 #include "entities/Player.h"
 #include "entities/Monster.h"
+
 #include "world/Dungeon.h"
+
 
 extern Arduboy2 arduboy;
 
 
 void Player::begin() {
     position = { 2, 2 };
-    direction = Direction::DOWN;
 
-    maxHp = 5;
-    hp = maxHp;
+    direction =
+        Direction::DOWN;
 
+
+    // Progression
+    level = 1;
+    xp = 0;
+
+    maxHp =
+        PLAYER_BASE_HP;
+
+    hp =
+        maxHp;
+
+
+    // Combat
     attackTimer = 0;
+    attackCooldown = 0;
 
+
+    // Objets
     inventory.clear();
     equipment.clear();
 }
@@ -27,24 +45,32 @@ int8_t Player::update(
     Monster* monsters,
     uint8_t monsterCount
 ) {
-    // Animation d'attaque
+    // Timers
+
     if (attackTimer > 0) {
         --attackTimer;
     }
 
+    if (attackCooldown > 0) {
+        --attackCooldown;
+    }
 
-    // --------------------
+
     // Déplacement
-    // --------------------
 
     if (
-        arduboy.justPressed(LEFT_BUTTON) ||
+        arduboy.justPressed(LEFT_BUTTON)
+        ||
         (
-            arduboy.pressed(LEFT_BUTTON) &&
-            arduboy.everyXFrames(MOVE_REPEAT_FRAMES)
+            arduboy.pressed(LEFT_BUTTON)
+            &&
+            arduboy.everyXFrames(
+                MOVE_REPEAT_FRAMES
+            )
         )
     ) {
-        direction = Direction::LEFT;
+        direction =
+            Direction::LEFT;
 
         tryMove(
             -1,
@@ -56,13 +82,18 @@ int8_t Player::update(
     }
 
     else if (
-        arduboy.justPressed(RIGHT_BUTTON) ||
+        arduboy.justPressed(RIGHT_BUTTON)
+        ||
         (
-            arduboy.pressed(RIGHT_BUTTON) &&
-            arduboy.everyXFrames(MOVE_REPEAT_FRAMES)
+            arduboy.pressed(RIGHT_BUTTON)
+            &&
+            arduboy.everyXFrames(
+                MOVE_REPEAT_FRAMES
+            )
         )
     ) {
-        direction = Direction::RIGHT;
+        direction =
+            Direction::RIGHT;
 
         tryMove(
             1,
@@ -74,13 +105,18 @@ int8_t Player::update(
     }
 
     else if (
-        arduboy.justPressed(UP_BUTTON) ||
+        arduboy.justPressed(UP_BUTTON)
+        ||
         (
-            arduboy.pressed(UP_BUTTON) &&
-            arduboy.everyXFrames(MOVE_REPEAT_FRAMES)
+            arduboy.pressed(UP_BUTTON)
+            &&
+            arduboy.everyXFrames(
+                MOVE_REPEAT_FRAMES
+            )
         )
     ) {
-        direction = Direction::UP;
+        direction =
+            Direction::UP;
 
         tryMove(
             0,
@@ -92,13 +128,18 @@ int8_t Player::update(
     }
 
     else if (
-        arduboy.justPressed(DOWN_BUTTON) ||
+        arduboy.justPressed(DOWN_BUTTON)
+        ||
         (
-            arduboy.pressed(DOWN_BUTTON) &&
-            arduboy.everyXFrames(MOVE_REPEAT_FRAMES)
+            arduboy.pressed(DOWN_BUTTON)
+            &&
+            arduboy.everyXFrames(
+                MOVE_REPEAT_FRAMES
+            )
         )
     ) {
-        direction = Direction::DOWN;
+        direction =
+            Direction::DOWN;
 
         tryMove(
             0,
@@ -110,14 +151,16 @@ int8_t Player::update(
     }
 
 
-    // --------------------
     // Attaque
-    // --------------------
 
-    // Pour l'instant : uniquement sur pression.
-    // Pas de maintien automatique afin d'éviter
-    // la mitraillette à épée xD
-    if (arduboy.justPressed(A_BUTTON)) {
+    if (
+        arduboy.pressed(A_BUTTON)
+        &&
+        attackCooldown == 0
+    ) {
+        attackCooldown =
+            getAttackCooldownFrames();
+
         return attack(
             monsters,
             monsterCount
@@ -128,6 +171,8 @@ int8_t Player::update(
     return -1;
 }
 
+
+// Déplacement
 
 void Player::tryMove(
     int8_t dx,
@@ -143,28 +188,37 @@ void Player::tryMove(
         position.y + dy;
 
 
-    // Limites du donjon
+    // Limites du monde
     if (
-        newX < 0 ||
-        newY < 0 ||
-        newX >= Dungeon::MAP_WIDTH ||
+        newX < 0
+        ||
+        newY < 0
+        ||
+        newX >= Dungeon::MAP_WIDTH
+        ||
         newY >= Dungeon::MAP_HEIGHT
     ) {
         return;
     }
 
 
-    // Collision avec la map
-    if (!dungeon.isWalkable(
-        static_cast<uint8_t>(newX),
-        static_cast<uint8_t>(newY)
-    )) {
+    // Collision avec les murs
+    if (
+        !dungeon.isWalkable(
+            static_cast<uint8_t>(newX),
+            static_cast<uint8_t>(newY)
+        )
+    ) {
         return;
     }
 
 
     // Collision avec les monstres
-    for (uint8_t i = 0; i < monsterCount; ++i) {
+    for (
+        uint8_t i = 0;
+        i < monsterCount;
+        ++i
+    ) {
         if (!monsters[i].isAlive()) {
             continue;
         }
@@ -173,7 +227,8 @@ void Player::tryMove(
             monsters[i].getPosition();
 
         if (
-            monsterPos.x == newX &&
+            monsterPos.x == newX
+            &&
             monsterPos.y == newY
         ) {
             return;
@@ -186,19 +241,23 @@ void Player::tryMove(
 }
 
 
+// Attaque
+
 int8_t Player::attack(
     Monster* monsters,
     uint8_t monsterCount
 ) {
-    // Déclenche l'animation même si on frappe dans le vide
-    attackTimer = ATTACK_ANIMATION_FRAMES;
+    attackTimer =
+        ATTACK_ANIMATION_FRAMES;
 
 
-    int8_t targetX = position.x;
-    int8_t targetY = position.y;
+    int8_t targetX =
+        position.x;
+
+    int8_t targetY =
+        position.y;
 
 
-    // La cible est la case immédiatement devant le joueur
     switch (direction) {
 
         case Direction::UP:
@@ -219,7 +278,11 @@ int8_t Player::attack(
     }
 
 
-    for (uint8_t i = 0; i < monsterCount; ++i) {
+    for (
+        uint8_t i = 0;
+        i < monsterCount;
+        ++i
+    ) {
         if (!monsters[i].isAlive()) {
             continue;
         }
@@ -230,7 +293,8 @@ int8_t Player::attack(
 
 
         if (
-            monsterPos.x == targetX &&
+            monsterPos.x == targetX
+            &&
             monsterPos.y == targetY
         ) {
             const bool killed =
@@ -239,10 +303,9 @@ int8_t Player::attack(
                 );
 
 
-            // Game pourra générer le loot
-            // à l'emplacement de ce monstre.
             if (killed) {
-                return static_cast<int8_t>(i);
+                return
+                    static_cast<int8_t>(i);
             }
 
 
@@ -255,32 +318,29 @@ int8_t Player::attack(
 }
 
 
-// --------------------
 // Position
-// --------------------
 
 Position Player::getPosition() const {
     return position;
 }
 
 
-void Player::setPosition(Position newPosition) {
-    position = newPosition;
+void Player::setPosition(
+    Position newPosition
+) {
+    position =
+        newPosition;
 }
 
 
-// --------------------
 // Orientation
-// --------------------
 
 Direction Player::getDirection() const {
     return direction;
 }
 
 
-// --------------------
 // Vie
-// --------------------
 
 uint8_t Player::getHp() const {
     return hp;
@@ -297,7 +357,9 @@ bool Player::isAlive() const {
 }
 
 
-void Player::takeDamage(uint8_t damage) {
+void Player::takeDamage(
+    uint8_t damage
+) {
     if (damage >= hp) {
         hp = 0;
         return;
@@ -307,56 +369,141 @@ void Player::takeDamage(uint8_t damage) {
 }
 
 
-// --------------------
+// XP / niveaux
+
+uint8_t Player::getLevel() const {
+    return level;
+}
+
+
+uint16_t Player::getXp() const {
+    return xp;
+}
+
+
+uint16_t Player::getXpToNextLevel() const {
+    return
+        XP_BASE_REQUIREMENT
+        +
+        static_cast<uint16_t>(
+            level - 1
+        )
+        *
+        XP_PER_LEVEL;
+}
+
+
+void Player::addXp(
+    uint8_t amount
+) {
+    xp += amount;
+
+
+    while (
+        xp >= getXpToNextLevel()
+    ) {
+        const uint16_t requiredXp =
+            getXpToNextLevel();
+
+        xp -= requiredXp;
+
+        levelUp();
+    }
+}
+
+
+void Player::levelUp() {
+    ++level;
+
+    maxHp +=
+        HP_PER_LEVEL;
+
+
+    // Full heal au level-up.
+    hp =
+        maxHp;
+}
+
+
 // Combat
-// --------------------
 
 bool Player::isAttacking() const {
-    return attackTimer > 0;
+    return
+        attackTimer > 0;
 }
 
 
 uint8_t Player::getAttackDamage() const {
-    // 1 point de dégâts de base à mains nues
-    // + dégâts apportés par l'arme.
-    return 1 + equipment.getWeaponDamage();
+    // 1 point de dégâts naturel
+    // + dégâts de l'arme.
+    return
+        1
+        +
+        equipment.getWeaponDamage();
 }
 
 
-// --------------------
-// Equipement
-// --------------------
+uint8_t Player::getAttackCooldownFrames() const {
+    const Item& weapon =
+        equipment.getWeapon();
 
-void Player::equip(const Item& item) {
-    equipment.equipWeapon(item);
+
+    if (!weapon.isValid()) {
+        return
+            FIST_ATTACK_COOLDOWN;
+    }
+
+
+    switch (weapon.type) {
+
+        case ItemType::DAGGER:
+            return
+                DAGGER_ATTACK_COOLDOWN;
+
+        case ItemType::SWORD:
+            return
+                SWORD_ATTACK_COOLDOWN;
+
+        case ItemType::AXE:
+            return
+                AXE_ATTACK_COOLDOWN;
+
+        default:
+            return
+                FIST_ATTACK_COOLDOWN;
+    }
 }
 
+// Inventaire
 
-const Equipment& Player::getEquipment() const {
-    return equipment;
-}
-
-bool Player::addItem(const Item& item) {
-    return inventory.add(item);
+bool Player::addItem(
+    const Item& item
+) {
+    return
+        inventory.add(item);
 }
 
 
 uint8_t Player::getInventoryCount() const {
-    return inventory.getCount();
+    return
+        inventory.getCount();
 }
 
 
 const Item& Player::getInventoryItem(
     uint8_t index
 ) const {
-    return inventory.get(index);
+    return
+        inventory.get(index);
 }
 
 
 bool Player::equipInventoryItem(
     uint8_t index
 ) {
-    if (index >= inventory.getCount()) {
+    if (
+        index >= inventory.getCount()
+    ) {
         return false;
     }
 
@@ -364,29 +511,31 @@ bool Player::equipInventoryItem(
     const Item& selected =
         inventory.get(index);
 
-    // Pour l'instant seules les armes
-    // sont équipables.
+
     if (
-        selected.type != ItemType::SWORD &&
+        selected.type != ItemType::DAGGER
+        &&
+        selected.type != ItemType::SWORD
+        &&
         selected.type != ItemType::AXE
     ) {
         return false;
     }
 
 
-    // getWeapon() renvoie une référence vers l'arme
-    // contenue dans Equipment, et celle-ci va changer
-    // quelques lignes plus bas.
     const Item oldWeapon =
         equipment.getWeapon();
 
 
     Item newWeapon;
 
-    if (!inventory.remove(
-        index,
-        newWeapon
-    )) {
+
+    if (
+        !inventory.remove(
+            index,
+            newWeapon
+        )
+    ) {
         return false;
     }
 
@@ -396,14 +545,28 @@ bool Player::equipInventoryItem(
     );
 
 
-    // S'il y avait déjà une arme,
-    // elle retourne dans le sac.
-    // Comme on vient de retirer newWeapon,
-    // une place est forcément disponible.
     if (oldWeapon.isValid()) {
-        inventory.add(oldWeapon);
+        inventory.add(
+            oldWeapon
+        );
     }
 
 
     return true;
+}
+
+
+// Equipement
+
+void Player::equip(
+    const Item& item
+) {
+    equipment.equipWeapon(
+        item
+    );
+}
+
+
+const Equipment& Player::getEquipment() const {
+    return equipment;
 }

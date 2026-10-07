@@ -7,22 +7,35 @@ Item ItemGenerator::generateWeapon(uint8_t depth) {
     Item item;
 
 
+    // --------------------
     // Type d'arme
+    // --------------------
 
-    if (random(0, 2) == 0) {
-        item.type = ItemType::SWORD;
+    switch (random(0, 3)) {
+        case 0:
+            item.type = ItemType::DAGGER;
+            break;
+
+        case 1:
+            item.type = ItemType::SWORD;
+            break;
+
+        default:
+            item.type = ItemType::AXE;
+            break;
     }
-    else {
-        item.type = ItemType::AXE;
-    }
 
 
+    // --------------------
     // Rareté
+    // --------------------
 
     item.rarity = generateRarity();
 
 
+    // --------------------
     // Affixes
+    // --------------------
 
     switch (item.rarity) {
 
@@ -39,7 +52,6 @@ Item ItemGenerator::generateWeapon(uint8_t depth) {
             else {
                 item.suffix = generateSuffix();
             }
-
             break;
 
 
@@ -47,12 +59,13 @@ Item ItemGenerator::generateWeapon(uint8_t depth) {
             // Préfixe + suffixe
             item.prefix = generatePrefix();
             item.suffix = generateSuffix();
-
             break;
     }
 
 
+    // --------------------
     // Dégâts
+    // --------------------
 
     item.damage =
         getBaseDamage(item.type, depth)
@@ -63,8 +76,11 @@ Item ItemGenerator::generateWeapon(uint8_t depth) {
     return item;
 }
 
+
 ItemRarity ItemGenerator::generateRarity() {
-    const uint8_t roll = random(0, 100);
+    const uint8_t roll =
+        static_cast<uint8_t>(random(0, 100));
+
 
     if (roll < 70) {
         return ItemRarity::COMMON;
@@ -76,6 +92,7 @@ ItemRarity ItemGenerator::generateRarity() {
 
     return ItemRarity::RARE;
 }
+
 
 ItemPrefix ItemGenerator::generatePrefix() {
     switch (random(0, 3)) {
@@ -106,22 +123,31 @@ ItemSuffix ItemGenerator::generateSuffix() {
     }
 }
 
+
 uint8_t ItemGenerator::getBaseDamage(
     ItemType type,
     uint8_t depth
 ) {
+    const uint8_t depthBonus =
+        depth / 4;
+
+
     switch (type) {
 
+        case ItemType::DAGGER:
+            return 1 + depthBonus;
+
         case ItemType::SWORD:
-            return 1 + depth / 4;
+            return 2 + depthBonus;
 
         case ItemType::AXE:
-            return 2 + depth / 4;
+            return 3 + depthBonus;
 
         default:
             return 0;
     }
 }
+
 
 uint8_t ItemGenerator::getPrefixDamage(
     ItemPrefix prefix

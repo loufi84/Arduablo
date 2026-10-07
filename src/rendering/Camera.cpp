@@ -1,13 +1,23 @@
-#include "rendering/Camera.h"
-
 #include "Config.h"
 
-void Camera::follow(Position target) {
+#include "rendering/Camera.h"
+
+
+void Camera::follow(
+    Position target
+) {
     int16_t newX =
-        static_cast<int16_t>(target.x) - VIEW_WIDTH / 2;
+        static_cast<int16_t>(target.x)
+        -
+        VIEW_WIDTH / 2;
 
     int16_t newY =
-        static_cast<int16_t>(target.y) - VIEW_HEIGHT / 2;
+        static_cast<int16_t>(target.y)
+        -
+        VIEW_HEIGHT / 2;
+
+
+    // Clamp gauche / haut
 
     if (newX < 0) {
         newX = 0;
@@ -17,24 +27,42 @@ void Camera::follow(Position target) {
         newY = 0;
     }
 
-    const int16_t maxX = MAP_WIDTH - VIEW_WIDTH;
-    const int16_t maxY = MAP_HEIGHT - VIEW_HEIGHT;
+
+    // Clamp droite
+
+    const int16_t maxX =
+        MAP_WIDTH > VIEW_WIDTH
+        ? MAP_WIDTH - VIEW_WIDTH
+        : 0;
+
 
     if (newX > maxX) {
         newX = maxX;
     }
 
+
+    // Clamp bas
+
+    const int16_t maxY =
+        MAP_HEIGHT > VIEW_HEIGHT
+        ? MAP_HEIGHT - VIEW_HEIGHT
+        : 0;
+
+
     if (newY > maxY) {
         newY = maxY;
     }
+
 
     x = static_cast<uint8_t>(newX);
     y = static_cast<uint8_t>(newY);
 }
 
+
 uint8_t Camera::getX() const {
     return x;
 }
+
 
 uint8_t Camera::getY() const {
     return y;

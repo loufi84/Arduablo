@@ -3,36 +3,78 @@
 #include <stdint.h>
 
 #include "Types.h"
+#include "data/MonsterData.h"
+
 
 class Monster {
-    public:
-        void spawn(int8_t x, int8_t y, uint8_t hp);
+public:
 
-        bool isAlive() const;
+    void spawn(
+        int8_t x,
+        int8_t y,
+        MonsterType type,
+        uint8_t depth
+    );
 
-        Position getPosition() const;
-        uint8_t getHp() const;
 
-        bool takeDamage(uint8_t damage);
+    bool isAlive() const;
 
-        void begin();
-        void update();
 
-        void setPosition(int8_t x, int8_t y);
+    Position getPosition() const;
 
-        void tickAnimation();
+    void setPosition(
+        int8_t x,
+        int8_t y
+    );
 
-        void startAttack(Direction direction);
 
-        bool isAttacking() const;
-        Direction getAttackDirection() const;
+    MonsterType getType() const;
 
-    private:
-        Position position { 0,0 };
 
-        uint8_t hp = 0;
-        bool alive = false;
+    uint8_t getHp() const;
 
-        uint8_t attackTimer = 0;
-        Direction attackDirection = Direction::DOWN;
+    uint8_t getDamage() const;
+
+    uint8_t getXpReward() const;
+
+    uint8_t getActionDelay() const;
+
+
+    bool takeDamage(
+        uint8_t damage
+    );
+
+
+    void tickAnimation();
+
+    void startAttack(
+        Direction direction
+    );
+
+    bool isAttacking() const;
+
+    Direction getAttackDirection() const;
+
+
+private:
+
+    Position position { 0, 0 };
+
+
+    MonsterType type =
+        MonsterType::ZOMBIE;
+
+
+    uint8_t depth = 1;
+
+    uint8_t hp = 0;
+
+
+    bool alive = false;
+
+
+    uint8_t attackTimer = 0;
+
+    Direction attackDirection =
+        Direction::DOWN;
 };

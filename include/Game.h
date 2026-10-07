@@ -7,6 +7,7 @@
 #include "rendering/Hud.h"
 #include "rendering/Camera.h"
 #include "items/GroundItem.h"
+#include "data/MonsterData.h"
 
 enum class GameState : uint8_t {
     TITLE,
@@ -42,4 +43,6 @@ class Game {
         Renderer renderer;
         Hud hud;
         Camera camera;
+
+        MonsterType rollMonsterType() const;
 };

@@ -5,6 +5,7 @@
 
 enum class ItemType : uint8_t {
     NONE = 0,
+    DAGGER,
     SWORD,
     AXE
 };

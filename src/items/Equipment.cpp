@@ -7,7 +7,8 @@ void Equipment::clear() {
 void Equipment::equipWeapon(const Item& item) {
     if (
         item.type == ItemType::SWORD ||
-        item.type == ItemType::AXE
+        item.type == ItemType::AXE ||
+        item.type == ItemType::DAGGER
     ) {
         weapon = item;
     }
