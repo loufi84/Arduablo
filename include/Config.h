@@ -15,6 +15,8 @@ constexpr uint8_t VIEW_HEIGHT = 3;
 // Entités
 constexpr uint8_t MAX_MONSTERS = 8;
 constexpr uint8_t MAX_ITEMS = 8;
+constexpr uint8_t MID_BOSS_DEPTH = 5;
+constexpr uint8_t FINAL_BOSS_DEPTH = 10;
 
 
 // Donjon

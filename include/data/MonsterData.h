@@ -5,7 +5,9 @@
 enum class MonsterType : uint8_t {
     ZOMBIE = 0,
     SKELETON,
-    BRUTE
+    BRUTE,
+    BONE_WARDEN,
+    ABYSS_LORD
 };
 
 struct MonsterDefinition {

@@ -18,7 +18,7 @@ public:
 
 
     bool isAlive() const;
-
+    bool isBoss() const;
 
     Position getPosition() const;
 

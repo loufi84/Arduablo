@@ -786,6 +786,7 @@ void AI::updateMonsters(
 
 
             case MonsterType::BRUTE:
+            case MonsterType::BONE_WARDEN:
 
                 updateBrute(
                     monster,

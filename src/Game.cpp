@@ -15,9 +15,45 @@
 extern Arduboy2 arduboy;
 
 
-// Initialisation
+namespace {
+
+bool isBossType(
+    MonsterType type
+) {
+    return
+        type == MonsterType::BONE_WARDEN
+        ||
+        type == MonsterType::ABYSS_LORD;
+}
+
+
+bool hasLivingBoss(
+    const Monster* monsters
+) {
+    for (
+        uint8_t i = 0;
+        i < MAX_MONSTERS;
+        ++i
+    ) {
+        if (
+            monsters[i].isAlive()
+            &&
+            isBossType(
+                monsters[i].getType()
+            )
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+}
+
 
 void Game::begin() {
+
     state = GameState::TITLE;
 
     depth = 1;
@@ -26,13 +62,9 @@ void Game::begin() {
 }
 
 
-// Update
-
 void Game::update() {
 
     switch (state) {
-
-        // TITLE
 
         case GameState::TITLE: {
 
@@ -44,11 +76,7 @@ void Game::update() {
         }
 
 
-        // PLAYING
-
         case GameState::PLAYING: {
-
-            // Joueur
 
             const int8_t killedMonster =
                 player.update(
@@ -58,29 +86,22 @@ void Game::update() {
                 );
 
 
-            // Monstre tué
-
             if (killedMonster >= 0) {
 
                 Monster& monster =
                     monsters[killedMonster];
 
 
-                // XP spécifique au type
                 player.addXp(
                     monster.getXpReward()
                 );
 
 
-                // Loot sur la position
-                // du monstre mort
                 tryDropLoot(
                     monster.getPosition()
                 );
             }
 
-
-            // Ramassage / inventaire
 
             if (arduboy.justPressed(B_BUTTON)) {
 
@@ -95,8 +116,6 @@ void Game::update() {
                     player.getInventoryCount();
 
 
-                // Rien ramassé :
-                // ouverture de l'inventaire
                 if (before == after) {
 
                     inventorySelection = 0;
@@ -108,8 +127,6 @@ void Game::update() {
                 }
             }
 
-
-            // Escalier
 
             const Position playerPosition =
                 player.getPosition();
@@ -123,15 +140,29 @@ void Game::update() {
                 ==
                 Tile::STAIRS_DOWN
             ) {
-                ++depth;
 
-                generateLevel();
+                if (!hasLivingBoss(monsters)) {
 
-                break;
+                    if (
+                        depth
+                        ==
+                        FINAL_BOSS_DEPTH
+                    ) {
+                        state =
+                            GameState::VICTORY;
+
+                        break;
+                    }
+
+
+                    ++depth;
+
+                    generateLevel();
+
+                    break;
+                }
             }
 
-
-            // Animations monstres
 
             for (
                 uint8_t i = 0;
@@ -141,14 +172,6 @@ void Game::update() {
                 monsters[i].tickAnimation();
             }
 
-
-            // IA
-
-            // Pour l'instant on garde
-            // encore l'ancien rythme global.
-            //
-            // getActionDelay() sera utilisé
-            // dans la prochaine étape.
 
             if (arduboy.everyXFrames(10)) {
 
@@ -161,14 +184,10 @@ void Game::update() {
             }
 
 
-            // Caméra
-
             camera.follow(
                 player.getPosition()
             );
 
-
-            // Mort
 
             if (!player.isAlive()) {
 
@@ -181,8 +200,6 @@ void Game::update() {
         }
 
 
-        // INVENTORY
-
         case GameState::INVENTORY: {
 
             updateInventory();
@@ -191,7 +208,11 @@ void Game::update() {
         }
 
 
-        // GAME OVER
+        case GameState::TOWN: {
+
+            break;
+        }
+
 
         case GameState::GAME_OVER: {
 
@@ -202,11 +223,21 @@ void Game::update() {
 
             break;
         }
+
+
+        case GameState::VICTORY: {
+
+            if (arduboy.justPressed(A_BUTTON)) {
+
+                state =
+                    GameState::TITLE;
+            }
+
+            break;
+        }
     }
 }
 
-
-// Render
 
 void Game::render() {
 
@@ -215,14 +246,13 @@ void Game::render() {
 
     switch (state) {
 
-        // TITLE
-
         case GameState::TITLE: {
 
             arduboy.setCursor(
                 37,
                 20
             );
+
 
             arduboy.print(
                 F("ARDUABLO")
@@ -234,6 +264,7 @@ void Game::render() {
                 38
             );
 
+
             arduboy.print(
                 F("[A] START")
             );
@@ -242,8 +273,6 @@ void Game::render() {
             break;
         }
 
-
-        // PLAYING
 
         case GameState::PLAYING: {
 
@@ -295,8 +324,6 @@ void Game::render() {
         }
 
 
-        // INVENTORY
-
         case GameState::INVENTORY: {
 
             hud.drawInventory(
@@ -309,7 +336,11 @@ void Game::render() {
         }
 
 
-        // GAME OVER
+        case GameState::TOWN: {
+
+            break;
+        }
+
 
         case GameState::GAME_OVER: {
 
@@ -317,6 +348,7 @@ void Game::render() {
                 38,
                 22
             );
+
 
             arduboy.print(
                 F("YOU DIED")
@@ -328,8 +360,37 @@ void Game::render() {
                 38
             );
 
+
             arduboy.print(
                 F("[A] TRY AGAIN")
+            );
+
+
+            break;
+        }
+
+
+        case GameState::VICTORY: {
+
+            arduboy.setCursor(
+                40,
+                20
+            );
+
+
+            arduboy.print(
+                F("VICTORY")
+            );
+
+
+            arduboy.setCursor(
+                29,
+                38
+            );
+
+
+            arduboy.print(
+                F("[A] TITLE")
             );
 
 
@@ -338,8 +399,6 @@ void Game::render() {
     }
 }
 
-
-// Nouvelle partie
 
 void Game::startNewGame() {
 
@@ -359,24 +418,17 @@ void Game::startNewGame() {
 }
 
 
-// Génération d'un étage
-
 void Game::generateLevel() {
 
-    // Donjon
     DungeonGenerator::generate(
         dungeon
     );
 
 
-    // Position joueur
-
     player.setPosition(
         dungeon.getStartPosition()
     );
 
-
-    // Reset monstres
 
     for (
         uint8_t i = 0;
@@ -388,8 +440,6 @@ void Game::generateLevel() {
     }
 
 
-    // Reset objets au sol
-
     for (
         uint8_t i = 0;
         i < MAX_ITEMS;
@@ -400,7 +450,169 @@ void Game::generateLevel() {
     }
 
 
-    // Spawn monstres
+    const Position playerPosition =
+        player.getPosition();
+
+
+    if (
+        depth == MID_BOSS_DEPTH
+        ||
+        depth == FINAL_BOSS_DEPTH
+    ) {
+
+        const MonsterType bossType =
+            depth == MID_BOSS_DEPTH
+                ?
+                MonsterType::BONE_WARDEN
+                :
+                MonsterType::ABYSS_LORD;
+
+
+        const Position exitPosition =
+            dungeon.getExitPosition();
+
+
+        const int8_t offsets[8][2] = {
+            {-1,  0},
+            { 1,  0},
+            { 0, -1},
+            { 0,  1},
+            {-1, -1},
+            { 1, -1},
+            {-1,  1},
+            { 1,  1}
+        };
+
+
+        bool bossSpawned = false;
+
+
+        for (
+            uint8_t i = 0;
+            i < 8;
+            ++i
+        ) {
+
+            const int16_t x =
+                static_cast<int16_t>(
+                    exitPosition.x
+                )
+                +
+                offsets[i][0];
+
+
+            const int16_t y =
+                static_cast<int16_t>(
+                    exitPosition.y
+                )
+                +
+                offsets[i][1];
+
+
+            if (
+                x < 0
+                ||
+                y < 0
+                ||
+                x >= MAP_WIDTH
+                ||
+                y >= MAP_HEIGHT
+            ) {
+                continue;
+            }
+
+
+            if (
+                dungeon.getTile(
+                    static_cast<uint8_t>(x),
+                    static_cast<uint8_t>(y)
+                )
+                !=
+                Tile::FLOOR
+            ) {
+                continue;
+            }
+
+
+            monsters[0].spawn(
+                static_cast<uint8_t>(x),
+                static_cast<uint8_t>(y),
+                bossType,
+                depth
+            );
+
+
+            bossSpawned = true;
+
+            break;
+        }
+
+
+        if (!bossSpawned) {
+
+            uint8_t attempts = 0;
+
+
+            while (attempts < 100) {
+
+                ++attempts;
+
+
+                Position position;
+
+
+                if (
+                    !DungeonGenerator::findRandomFloor(
+                        dungeon,
+                        position
+                    )
+                ) {
+                    continue;
+                }
+
+
+                if (
+                    abs(
+                        position.x
+                        -
+                        playerPosition.x
+                    )
+                    <= 2
+                    &&
+                    abs(
+                        position.y
+                        -
+                        playerPosition.y
+                    )
+                    <= 2
+                ) {
+                    continue;
+                }
+
+
+                monsters[0].spawn(
+                    position.x,
+                    position.y,
+                    bossType,
+                    depth
+                );
+
+
+                bossSpawned = true;
+
+                break;
+            }
+        }
+
+
+        camera.follow(
+            player.getPosition()
+        );
+
+
+        return;
+    }
+
 
     constexpr uint8_t MONSTERS_PER_LEVEL =
         3;
@@ -411,15 +623,12 @@ void Game::generateLevel() {
     uint8_t attempts = 0;
 
 
-    const Position playerPosition =
-        player.getPosition();
-
-
     while (
         spawned < MONSTERS_PER_LEVEL
         &&
         attempts < 100
     ) {
+
         ++attempts;
 
 
@@ -435,8 +644,6 @@ void Game::generateLevel() {
             continue;
         }
 
-
-        // Pas trop près du joueur
 
         if (
             abs(
@@ -457,9 +664,6 @@ void Game::generateLevel() {
         }
 
 
-        // Pas deux monstres
-        // sur la même case
-
         bool occupied = false;
 
 
@@ -468,6 +672,7 @@ void Game::generateLevel() {
             i < spawned;
             ++i
         ) {
+
             if (!monsters[i].isAlive()) {
                 continue;
             }
@@ -486,6 +691,7 @@ void Game::generateLevel() {
                     ==
                 position.y
             ) {
+
                 occupied = true;
 
                 break;
@@ -497,8 +703,6 @@ void Game::generateLevel() {
             continue;
         }
 
-
-        // Création du monstre
 
         monsters[spawned].spawn(
             position.x,
@@ -512,15 +716,11 @@ void Game::generateLevel() {
     }
 
 
-    // Caméra
-
     camera.follow(
         player.getPosition()
     );
 }
 
-
-// Choix du type de monstre
 
 MonsterType Game::rollMonsterType() const {
 
@@ -530,21 +730,12 @@ MonsterType Game::rollMonsterType() const {
         );
 
 
-    // Depth 1 - 2
-    //
-    // 100 % Zombie
-
     if (depth < 3) {
 
         return
             MonsterType::ZOMBIE;
     }
 
-
-    // Depth 3 - 4
-    //
-    // 70 % Zombie
-    // 30 % Skeleton
 
     if (depth < 5) {
 
@@ -559,12 +750,6 @@ MonsterType Game::rollMonsterType() const {
             MonsterType::SKELETON;
     }
 
-
-    // Depth 5+
-    //
-    // 50 % Zombie
-    // 30 % Skeleton
-    // 20 % Brute
 
     if (roll < 50) {
 
@@ -585,13 +770,10 @@ MonsterType Game::rollMonsterType() const {
 }
 
 
-// Drop de loot
-
 void Game::tryDropLoot(
     Position position
 ) {
 
-    // 50 % de chance de drop
     if (random(0, 100) >= 50) {
         return;
     }
@@ -627,8 +809,6 @@ void Game::tryDropLoot(
 }
 
 
-// Ramassage
-
 void Game::tryPickupItem() {
 
     const Position playerPosition =
@@ -659,14 +839,12 @@ void Game::tryPickupItem() {
         }
 
 
-        // On ne fait disparaître l'objet
-        // que si le sac a effectivement
-        // réussi à le prendre.
         if (
             player.addItem(
                 groundItems[i].item
             )
         ) {
+
             groundItems[i].active =
                 false;
         }
@@ -677,36 +855,30 @@ void Game::tryPickupItem() {
 }
 
 
-// Inventaire
-
 void Game::updateInventory() {
 
     const uint8_t count =
         player.getInventoryCount();
 
 
-    // Retour au jeu
-
     if (arduboy.justPressed(B_BUTTON)) {
 
         state =
             GameState::PLAYING;
 
+
         return;
     }
 
-
-    // Inventaire vide
 
     if (count == 0) {
 
         inventorySelection = 0;
 
+
         return;
     }
 
-
-    // Sélection précédente
 
     if (arduboy.justPressed(UP_BUTTON)) {
 
@@ -723,8 +895,6 @@ void Game::updateInventory() {
     }
 
 
-    // Sélection suivante
-
     if (arduboy.justPressed(DOWN_BUTTON)) {
 
         ++inventorySelection;
@@ -735,12 +905,11 @@ void Game::updateInventory() {
             >=
             count
         ) {
+
             inventorySelection = 0;
         }
     }
 
-
-    // Equiper
 
     if (arduboy.justPressed(A_BUTTON)) {
 
@@ -749,8 +918,6 @@ void Game::updateInventory() {
         );
 
 
-        // Le nombre d'objets peut changer
-        // si aucune arme n'était équipée.
         const uint8_t newCount =
             player.getInventoryCount();
 
@@ -765,6 +932,7 @@ void Game::updateInventory() {
             >=
             newCount
         ) {
+
             inventorySelection =
                 newCount - 1;
         }

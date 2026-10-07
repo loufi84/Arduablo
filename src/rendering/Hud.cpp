@@ -11,9 +11,7 @@
 extern Arduboy2 arduboy;
 
 
-// ============================================================
 // HUD en jeu
-// ============================================================
 
 void Hud::draw(
     const Player& player
@@ -22,9 +20,7 @@ void Hud::draw(
         VIEW_HEIGHT * TILE_SIZE;
 
 
-    // --------------------
     // Ligne 1
-    // --------------------
 
     arduboy.setCursor(
         0,
@@ -58,10 +54,8 @@ void Hud::draw(
     );
 
 
-    // --------------------
     // Ligne 2
     // si on a encore la place
-    // --------------------
 
     if (hudY + 8 < 64) {
 
@@ -85,9 +79,7 @@ void Hud::draw(
 }
 
 
-// ============================================================
 // Nom d'un objet
-// ============================================================
 
 void Hud::drawItemName(
     const Item& item
@@ -113,9 +105,7 @@ void Hud::drawItemName(
 }
 
 
-// ============================================================
 // Inventaire
-// ============================================================
 
 void Hud::drawInventory(
     const Player& player,
@@ -125,9 +115,7 @@ void Hud::drawInventory(
         player.getInventoryCount();
 
 
-    // --------------------
     // Titre
-    // --------------------
 
     arduboy.setCursor(
         0,
@@ -141,9 +129,7 @@ void Hud::drawInventory(
     arduboy.print(F("/6"));
 
 
-    // --------------------
     // Inventaire vide
-    // --------------------
 
     if (count == 0) {
 
@@ -170,11 +156,8 @@ void Hud::drawInventory(
     }
 
 
-    // ========================================================
     // Liste
-    //
     // 4 objets visibles simultanément.
-    // ========================================================
 
     uint8_t firstVisible = 0;
 
@@ -216,9 +199,7 @@ void Hud::drawInventory(
         );
 
 
-        // --------------------
         // Curseur
-        // --------------------
 
         if (index == selectedIndex) {
 
@@ -230,9 +211,7 @@ void Hud::drawInventory(
         }
 
 
-        // --------------------
         // Rareté
-        // --------------------
 
         switch (item.rarity) {
 
@@ -255,18 +234,14 @@ void Hud::drawInventory(
         }
 
 
-        // --------------------
         // Nom
-        // --------------------
 
         drawItemName(
             item
         );
 
 
-        // --------------------
         // Dégâts
-        // --------------------
 
         arduboy.print(F(" +"));
 
@@ -276,9 +251,7 @@ void Hud::drawInventory(
     }
 
 
-    // ========================================================
     // Arme équipée
-    // ========================================================
 
     arduboy.setCursor(
         0,
@@ -314,9 +287,7 @@ void Hud::drawInventory(
     }
 
 
-    // ========================================================
     // Commandes
-    // ========================================================
 
     arduboy.setCursor(
         0,

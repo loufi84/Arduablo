@@ -7,7 +7,9 @@ const MonsterDefinition MONSTER_DATA[] PROGMEM = {
     // HP, DMG, DELAY, XP
     { 3, 1, 10, 2},
     { 2, 1, 12, 3},
-    { 7, 2, 16, 5}
+    { 7, 2, 16, 5},
+    { 18, 3, 8, 20},
+    { 32, 4, 8, 50}
 };
 
 MonsterDefinition getMonsterDefinition(MonsterType type) {

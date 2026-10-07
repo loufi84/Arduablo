@@ -14,7 +14,8 @@ enum class GameState : uint8_t {
     PLAYING,
     INVENTORY,
     TOWN,
-    GAME_OVER
+    GAME_OVER,
+    VICTORY
 };
 
 class Game {

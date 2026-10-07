@@ -149,3 +149,7 @@ bool Monster::isAttacking() const {
 Direction Monster::getAttackDirection() const {
     return attackDirection;
 }
+
+bool Monster::isBoss() const {
+    return type == MonsterType::BONE_WARDEN || type == MonsterType::ABYSS_LORD;
+}

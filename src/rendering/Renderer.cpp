@@ -30,9 +30,7 @@ constexpr int16_t TILE_QUARTER =
     TILE_SIZE / 4;
 
 
-// ============================================================
 // Conversion coordonnées monde -> écran
-// ============================================================
 
 bool worldToScreen(
     Position position,
@@ -77,9 +75,7 @@ bool worldToScreen(
 } // namespace
 
 
-// ============================================================
 // Donjon
-// ============================================================
 
 void Renderer::drawDungeon(
     const Dungeon& dungeon,
@@ -162,9 +158,7 @@ void Renderer::drawDungeon(
 }
 
 
-// ============================================================
 // Joueur
-// ============================================================
 
 void Renderer::drawPlayer(
     const Player& player,
@@ -195,9 +189,7 @@ void Renderer::drawPlayer(
 }
 
 
-// ============================================================
 // Monstres
-// ============================================================
 
 void Renderer::drawMonsters(
     const Monster* monsters,
@@ -268,14 +260,35 @@ void Renderer::drawMonsters(
                 );
 
                 break;
+
+            case MonsterType::BONE_WARDEN:
+
+                Sprites::drawSelfMasked(
+                    px,
+                    py,
+                    GameSprites::BONE_WARDEN,
+                    0
+                );
+
+                break;
+
+            /* case MonsterType::ABYSS_LORD:
+
+                Sprites::drawSelfMasked(
+                    px,
+                    py,
+                    GameSprite::ABYSS_LORD,
+                    0
+                );
+
+                break;
+                */
         }
     }
 }
 
 
-// ============================================================
 // Objets au sol
-// ============================================================
 
 void Renderer::drawGroundItem(
     const GroundItem* items,
@@ -355,9 +368,7 @@ void Renderer::drawGroundItem(
 }
 
 
-// ============================================================
 // Attaque joueur
-// ============================================================
 
 void Renderer::drawPlayerAttack(
     const Player& player,
@@ -449,9 +460,7 @@ void Renderer::drawPlayerAttack(
 }
 
 
-// ============================================================
 // Attaques monstres
-// ============================================================
 
 void Renderer::drawMonsterAttack(
     const Monster* monsters,
@@ -499,9 +508,7 @@ void Renderer::drawMonsterAttack(
             monsters[i].getAttackDirection();
 
 
-        // ====================================================
         // Skeleton
-        // ====================================================
 
         if (
             monsters[i].getType()
@@ -567,9 +574,7 @@ void Renderer::drawMonsterAttack(
         }
 
 
-        // ====================================================
         // Zombie / Brute
-        // ====================================================
 
         const int16_t offset =
             TILE_QUARTER / 2;
